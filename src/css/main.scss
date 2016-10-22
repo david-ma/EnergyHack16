@@ -1,0 +1,119 @@
+
+body {
+  background-color: #eee;
+}
+
+.page {
+  background-color: #fff;
+}
+
+header {
+  width: 100%;
+  height: 500px;
+  background: #333e52;
+}
+header .blur_background {
+  height: 500px;
+  width: 100%;
+  position: absolute;
+  background: url("/images/header.jpg");
+  background-size: cover;
+  background-position: 50% 60%;
+  /*Depending on your photo, you might need to blur the background.*/
+  -webkit-filter: blur(1px);
+  -moz-filter: blur(1px);
+  -o-filter: blur(1px);
+  -ms-filter: blur(1px);
+  filter: blur(1px);
+}
+footer {
+  width: 100%;
+  height: 50px;
+  background: #ddd;
+}
+
+.mask {
+  height: 100%;
+  background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+}
+
+header .container {
+  padding-top: 300px;
+}
+
+header h1 {
+  font-size: 60px;
+  color: #eee;
+  margin: 0;
+}
+header h2 {
+  font-size: 30px;
+  color: #eee;
+  margin: 0;
+}
+
+
+#map {
+  //height: 600px;
+  //width: 600px;
+
+  text, label {
+    font-family: sans-serif;
+  }
+  label {
+    text-align: center;
+    font-weight: bold;
+    padding: 0 10px;
+    line-height: 50px;
+  }
+  input {
+    text-align: center;
+    width: 5em;
+  }
+  .feature {
+    stroke: none;
+  }
+  .divider {
+    stroke: #dedede;
+    stroke-width: 0.5px;
+  }
+  .legend {
+    display: none;
+  }
+}
+
+#piechart {
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  path.slice{
+    stroke-width:2px;
+  }
+
+  polyline{
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

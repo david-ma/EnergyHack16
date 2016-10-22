@@ -9,77 +9,6 @@
 
 <style>
 
-body {
-	background-color: #eee;
-}
-
-.page {
-	background-color: #fff;
-}
-
-header {
-	width: 100%;
-	height: 500px;
-	background: #333e52;
-}
-header .blur_background {
-	height: 500px;
-	width: 100%;
-	position: absolute;
-	background: url("/images/header.jpg");
-	background-size: cover;
-	background-position: 50% 60%;
-	/*Depending on your photo, you might need to blur the background.*/
-	-webkit-filter: blur(1px);
-	-moz-filter: blur(1px);
-	-o-filter: blur(1px);
-	-ms-filter: blur(1px);
-	filter: blur(1px);
-}
-footer {
-	width: 100%;
-	height: 50px;
-	background: #ddd;
-}
-
-.mask {
-	height: 100%;
-	background: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.3), rgba(0,0,0,0.5));
-}
-
-header .container {
-	padding-top: 300px;
-}
-
-header h1 {
-	font-size: 60px;
-	color: #eee;
-	margin: 0;
-}
-header h2 {
-	font-size: 30px;
-	color: #eee;
-	margin: 0;
-}
-
-#map {
-	width: 100%;
-	height: 400px;
-}
-#save-widget {
-	box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px;
-	background-color: white;
-	padding: 5px;
-	font-family: Roboto, Arial;
-	font-size: 13px;
-	margin: 15px;
-}
-
-#save-widget p {
-	margin: 0;
-}
-
-
 </style>
 </head>
 <body>
@@ -113,19 +42,18 @@ header h2 {
 
 			<!--<h2>Ok here's some dummy text:</h2>-->
 <br>
+<div class="row">
+		<label for="postcode">Enter a Postcode:<input id="postcode" autofocus maxlength=4 placeholder="Postcode" type="text" /></label>
+</div>
+
+
 		<div class="row">
 			<div class="col-xs-12 col-sm-8">
-
-				<!--<div id="save-widget">-->
-					<!--<p id="address">Venue Name<br>Venue Location</p>-->
-				<!--</div>-->
 				<div id="map"></div>
-
 			</div>
 
-
-			<div class="col-xs-12 col-sm-4">
-<p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+te			<div class="col-xs-12 col-sm-4">
+				<div id="donut"></div>
 			</div>
 		</div>
 	</div>
@@ -141,64 +69,191 @@ header h2 {
 	<link rel="stylesheet" href="/css/main.css">
 	<script src="/js/vendor.min.js"></script>
 	<script src="/js/scripts.min.js"></script>
+	<!--<script src="//d3js.org/topojson.v1.min.js"></script>-->
+
+
+	<!-- For the postcode data, we need to use topojson v0 -->
+	<!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
+	<script src="http://d3js.org/topojson.v0.min.js"></script>
 
 
 
 
-<!--<script>-->
-	<!--var data = {-->
-		<!--lat: -37.8166,-->
-		<!--lng: 144.964,-->
-		<!--placeId: "ChIJJSm1i7RC1moRWgd5CZHCx70"-->
-	<!--};-->
-	<!--function initMap() {-->
-		<!--var mapDiv = document.getElementById('map');-->
-		<!--var map = new google.maps.Map(mapDiv, {-->
-			<!--center: {-->
-				<!--lat: data.lat,-->
-				<!--lng: data.lng-->
-			<!--},-->
-			<!--streetViewControl: false,-->
-			<!--fullscreenControl: false,-->
-			<!--mapTypeControl: false,-->
-			<!--zoom: 6-->
-		<!--});-->
+<script>
+	var width = 750,
+		height = 700;
 
-		<!--var widgetDiv = document.getElementById('save-widget');-->
-		<!--map.controls[google.maps.ControlPosition.TOP_LEFT].push(widgetDiv);-->
+	var svg = d3.select("#map").append("svg")
+			.attr("viewBox", "0 0 750 750")
+			.attr("width", width)
+			.attr("height", height + 50);
 
-		<!--// Append a Save Control to the existing save-widget div.-->
-		<!--var saveWidget = new google.maps.SaveWidget(widgetDiv, {-->
-			<!--place: {-->
-				<!--placeId: data.placeId,-->
-				<!--location: {lat: data.lat, lng: data.lng}-->
-			<!--},-->
-			<!--attribution: {-->
-				<!--source: 'Google Maps JavaScript API',-->
-				<!--webUrl: 'https://developers.google.com/maps/'-->
-			<!--}-->
-		<!--});-->
+	var g = svg.append("g")
+			.attr("transform", "translate(0, 50)")
+			.append("g");
 
-		<!--var marker = new google.maps.Marker({-->
-			<!--map: map,-->
-			<!--position: saveWidget.getPlace().location-->
-		<!--});-->
-	<!--}-->
-<!--</script>-->
-<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5BnoexCNyCosPsiH8JKh1N7r-RuJlE6A&callback=initMap">-->
-<!--</script>-->
+//	var color = d3.scale.category10();
+	var loading = svg.append("text")
+			.attr("x", width / 2)
+			.attr("y", height / 2)
+			.attr("dy", ".35em")
+			.attr("text-anchor", "middle")
+			.style("font-size", 40)
+			.text("Loading...");
+	d3.json("/data/postcodes.json", function(error, postcodes) {
+		var postcodesgeo = topojson.object(postcodes, postcodes.objects.postcodesgeo).geometries;
+		var mainlandWidth = 236;
+		var leftMargin = 186;
+		var rightMargin = 64;
+		var allAus = mainlandWidth + leftMargin + rightMargin;
+		var translateWidth = width / (allAus / mainlandWidth);
+		var projection = d3.geo.albers()
+				.translate([translateWidth, height / 2])
+				.scale(1100)
+				.rotate([-132.5, 0])
+				.center([0, -26.5]) // Center of Australia, accounting for tasmania
+				.parallels([-36, -18]);
+		var path = d3.geo.path()
+				.projection(projection);
+		var input = d3.select("input")
+				.on("cut", change)
+				.on("paste", change)
+				.on("change", change)
+				.on("keyup", change);
+		var feature = g.selectAll("path")
+				.data(postcodesgeo)
+				.enter().append("path")
+				.attr("class", "feature")
+				.attr("d", path);
+		loading.remove();
+
+//	This is for the legend...
+//		svg.append("rect")
+//				.attr("x", 0)
+//				.attr("y", 0)
+//				.attr("height", 50)
+//				.attr("width", width)
+//				.style("fill", "white");
+//		svg.append("line")
+//				.attr("class", "divider")
+//				.attr("x1", 0)
+//				.attr("x2", width)
+//				.attr("y1", 51)
+//				.attr("y2", 51);
+
+		var legends = svg.append("g").attr("class", "legends");
+		svg.selectAll("text.legend")
+				.data([0,1,2,3,4,5,6,7,8,9])
+				.enter().append("text")
+				.attr("class", "legend")
+				.attr("y", 25)
+				.attr("x", function(d) { return width - (10 - d) * 50 + 25; })
+				.style("fill", "white")
+				.attr("dy", ".35em")
+				.attr("text-anchor", "middle")
+				.style("font-size", 20)
+				.text(String);
+		var prefix = "POA";
+		var selectedPostcode;
+		change();
+		function updateLegend(legend) {
+			var container = legends.selectAll("rect.legend")
+					.data(legend, function(d) { return d; });
+			container
+					.transition().duration(750)
+					.attr("x", function(d) { return width - (10 - d) * 50; })
+					.style("fill", function(d) { return color(d); })
+					.attr("y", 0);
+			container.enter().append("rect")
+					.attr("class", "legend")
+					.attr("y", -50)
+					.attr("width", 50)
+					.attr("height", 50)
+					.attr("x", function(d) { return width - (10 - d) * 50; })
+					.transition()
+					.duration(750)
+					.ease("bounce")
+					.style("fill", function(d) { return color(d); })
+					.attr("y", 0);
+			container.exit().transition().duration(400)
+					.ease("backs")
+					.attr("y", -50)
+					.remove();
+		}
+		function setFoundStyle(selection, postcode) {
+			selection.style("fill", color(postcode.slice(-1)));
+		}
+		function unzoom(selection) {
+			selection.transition().duration(750).attr("transform", "");
+		}
+		function zoom(selection, b, maxScale) {
+			var scale = 0.95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height);
+			var usedScale = Math.min(scale, maxScale);
+			selection.transition().duration(750).attr("transform",
+					"translate(" + projection.translate() + ")" +
+					"scale(" + usedScale + ")" +
+					"translate(" + -(b[1][0] + b[0][0]) / 2 + "," + -(b[1][1] + b[0][1]) / 2 + ")");
+		}
 
 
+		function change() {
+			var lastPostcode = selectedPostcode;
+			selectedPostcode = input.property("value");
+			if (lastPostcode === selectedPostcode) {
+				return;
+			}
+			var shouldUnzoom = selectedPostcode === "";
+			var shouldZoom = selectedPostcode.match(/\d{1,4}/);
+			if (!shouldUnzoom && !shouldZoom) {
+				return;
+			}
+			var matchString = prefix + selectedPostcode;
+			var findBounds = findMinMaxBounds();
+			var bounds;
+			var legendObj = {};
+			var matching = feature.filter(function(d) {
+				var match = matchingFeature(d, matchString);
+				var next = nextDigit(d, matchString);
+				this.style.fill = match ? color(+next) : "#222";
+				if (match) {
+					if (next) { legendObj[+next] = true; }
+					bounds = findBounds(path.bounds(d));
+				}
+				return match;
+			});
+			updateLegend(d3.keys(legendObj).map(function(d) { return +d; }));
+			if (matching[0].length === 0) { return; }
+			if (selectedPostcode.length === 4 && matching[0].length === 1) { matching.call(setFoundStyle, matchString); }
+			var zoomers = function() {
+				if (shouldZoom) { g.call(zoom, bounds, 100); }
+				if (shouldUnzoom) { g.call(unzoom); }
+			};
+			setTimeout(zoomers, 0);
+		}
 
 
-
-
-
-
-
-
-
-
+		function nextDigit(feature, string) {
+			return feature.id.charAt(string.length);
+		}
+		function matchingFeature(feature, string) {
+			return feature.id.indexOf(string) !== -1;
+		}
+		function findMinMaxBounds() {
+			var topBound    = -Infinity;
+			var rightBound  = -Infinity;
+			var bottomBound =  Infinity;
+			var leftBound   =  Infinity;
+			return function (bound) {
+				leftBound = Math.min(bound[0][0], leftBound);
+				bottomBound = Math.min(bound[0][1], bottomBound);
+				rightBound = Math.max(bound[1][0], rightBound);
+				topBound = Math.max(bound[1][1], topBound);
+				return [[leftBound, bottomBound], [rightBound, topBound]];
+			};
+		}
+	});
+	d3.select(self.frameElement).style("height", height + "px");
+</script>
 
 
 
