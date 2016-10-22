@@ -52,11 +52,12 @@ header h2 {
   margin: 0;
 }
 
+#map-svg, #donut-svg {
+  width: 100%;
+  height: 100%;
+}
 
-#map {
-  //height: 600px;
-  //width: 600px;
-
+#map-div {
   text, label {
     font-family: sans-serif;
   }
@@ -82,7 +83,7 @@ header h2 {
   }
 }
 
-#piechart {
+#donut-div {
   svg {
     width: 100%;
     height: 100%;
