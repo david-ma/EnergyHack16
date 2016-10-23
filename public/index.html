@@ -182,8 +182,8 @@
 		var input = d3.select("input")
 				.on("cut", change)
 				.on("paste", change)
-				.on("change", change)
-				.on("keyup", change);
+				.on("change", change);
+//				.on("keyup", change);
 		var feature = g.selectAll("path")
 				.data(postcodesgeo)
 				.enter().append("path")
@@ -260,13 +260,18 @@
 					"translate(" + -(b[1][0] + b[0][0]) / 2 + "," + -(b[1][1] + b[0][1]) / 2 + ")");
 		}
 
-
 		function change() {
+			re = /^\d\d\d\d$/m;
+
 			var lastPostcode = selectedPostcode;
 			selectedPostcode = input.property("value");
-			if (lastPostcode === selectedPostcode) {
-				return;
+			if (lastPostcode === selectedPostcode ||
+				!re.test(selectedPostcode)) {
+				if (selectedPostcode !== "") {
+					return;
+				}
 			}
+			change_donut(randomData());
 			var shouldUnzoom = selectedPostcode === "";
 			var shouldZoom = selectedPostcode.match(/\d{1,4}/);
 			if (!shouldUnzoom && !shouldZoom) {
@@ -373,7 +378,7 @@
 		});
 	}
 
-	change(randomData());
+	change_donut(randomData());
 
 	d3.select(".randomize")
 			.on("click", function(){
@@ -381,7 +386,7 @@
 			});
 
 
-	function change(data) {
+	function change_donut(data) {
 
 		/* ------- PIE SLICES -------*/
 		var slice = donut_svg.select(".slices").selectAll("path.slice")
